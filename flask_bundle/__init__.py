@@ -19,7 +19,7 @@ class ApiBlueprints(object):
     pass
 
 
-class RestApiBundle(object):
+class FlaskBundle(object):
     def __init__(self):
         self.config_mapping = {
             "flask": {
