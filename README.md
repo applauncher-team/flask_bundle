@@ -8,7 +8,6 @@ Install: pip install flask_applauncher_bundle
 
 ```yml
 flask:
-  #driver: "mysql+pymysql"
   use_debugger: True
   port: {flask_port}
   host: {flask_host}
