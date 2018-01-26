@@ -5,6 +5,7 @@ from flask import Flask
 import datetime
 import threading
 import applauncher.kernel
+from flask_cors import CORS
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -20,12 +21,16 @@ class ApiBlueprints(object):
 
 
 class FlaskBundle(object):
+    app = None
     def __init__(self):
         self.config_mapping = {
             "flask": {
                 "use_debugger": False,
                 "port": 3003,
-                "host": "0.0.0.0"
+                "host": "0.0.0.0",
+                "cors": False,
+                "debug": False,
+                "secret_key": "cHanGeME"
             }
         }
 
@@ -39,17 +44,31 @@ class FlaskBundle(object):
     @inject.params(config=applauncher.kernel.Configuration)
     def start_sever(self, config):
         app = Flask("FlaskServer")
+
         app.json_encoder = CustomJSONEncoder
 
         for blueprint in self.blueprints:
             app.register_blueprint(blueprint)
 
         c = config.flask
-        app.run(use_debugger=c.use_debugger, port=c.port, host=c.host)
+        app.secret_key = c.secret_key
+        FlaskBundle.app = app
+
+        if c.cors:
+            CORS(app)
+
+        if c.debug:
+            app.run(use_debugger=c.use_debugger, port=c.port, host=c.host)
+
 
     def kernel_ready(self, event):
         if isinstance(event, applauncher.kernel.KernelReadyEvent):
-            t = threading.Thread(target=self.start_sever)
-            t.start()
+            c = inject.instance(applauncher.kernel.Configuration).flask
+            if c.debug:
+                t = threading.Thread(target=self.start_sever)
+                t.start()
+            else:
+                self.start_sever()
+
 
 
