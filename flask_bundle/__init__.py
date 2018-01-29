@@ -6,6 +6,7 @@ import datetime
 import threading
 import applauncher.kernel
 from flask_cors import CORS
+from applauncher.kernel import Environments, Kernel
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -53,22 +54,23 @@ class FlaskBundle(object):
         c = config.flask
         app.secret_key = c.secret_key
         FlaskBundle.app = app
-
         if c.cors:
             CORS(app)
 
         if c.debug:
-            app.run(use_debugger=c.use_debugger, port=c.port, host=c.host)
+            kernel = inject.instance(Kernel)
+            if kernel.environment != Environments.TEST:
+                app.run(use_debugger=c.use_debugger, port=c.port, host=c.host)
 
 
     def kernel_ready(self, event):
         if isinstance(event, applauncher.kernel.KernelReadyEvent):
+            kernel = inject.instance(applauncher.kernel.Kernel)
             c = inject.instance(applauncher.kernel.Configuration).flask
             if c.debug:
                 t = threading.Thread(target=self.start_sever)
                 t.start()
             else:
                 self.start_sever()
-
 
 
