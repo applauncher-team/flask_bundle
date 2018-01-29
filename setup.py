@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name='flask_applauncher_bundle',
   packages=['flask_bundle'],
-  version='1.03',
+  version='1.04',
   description='flask support for applauncher',
   author='Alvaro Garcia Gomez',
   author_email='maxpowel@gmail.com',
